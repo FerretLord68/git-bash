@@ -11,11 +11,11 @@ read usergroup
 #creating the user with a home dir
 $(useradd --create-home $username)
 
-#adding the user to the correct group
-$(adduser $username $usergroup)
-
 #creating tempery password for new user
 $(passwd $username)
+
+#adding the user to the correct group
+$(adduser $username $usergroup)
 
 #force the new user to create a new login on first login
 $(passwd --expire $username)

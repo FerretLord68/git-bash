@@ -5,5 +5,6 @@ First of all, I'll make som "easy" scripts.
 - update & upgrade
 - save my perferd aliases
 - install ssh & sudo (for new installes of servers)
+- an install script for all bash scrpits.
 
 - Whatever Rene thinks is a good idea.

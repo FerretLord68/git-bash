@@ -13,7 +13,7 @@ read USERGROUP
 #creating the user with a home dir
 useradd -m $USERNAME
 
-usermod -m -d /home/$USERNAME $USERNAME
+usermod -m -d /home/$USERNAME -s /bin/bash $USERNAME
 
 #creating tempery password for new user
 passwd $USERNAME

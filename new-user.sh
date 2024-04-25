@@ -13,6 +13,7 @@ read USERGROUP
 #creating the user with a home dir
 useradd -m $USERNAME
 
+#force the user into the home dir.
 usermod -m -d /home/$USERNAME -s /bin/bash $USERNAME
 
 #creating tempery password for new user

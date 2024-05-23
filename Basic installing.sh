@@ -1,5 +1,6 @@
-
 #!/bin/bash
+
+# This is a test
 
 # Ensure the script is run as root
 if [[ $EUID -ne 0 ]]; then

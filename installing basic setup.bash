@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Variables
+DOMAIN="gruppe6.dk"
+DOMAIN_IP="domain_ip"
+AD_OU="LinuxAdm"
+USER="frol"
+
 # Ensure the script is run as root
 if [[ $EUID -ne 0 ]]; then
     echo "This script must be run as root. Use sudo to run it."
@@ -14,7 +20,7 @@ apt update -qq && apt upgrade -qq -y
 if ! command -v sudo &> /dev/null; then
     echo "Installing sudo..."
     apt install -qq -y sudo
-	echo "%LinuxAdm@gruppe6.dk ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers
+	echo "%$AD_OU@$DOMAIN ALL=(ALL:ALL) ALL" | sudo tee -a /etc/sudoers
 else
     echo "Sudo is already installed."
 fi
@@ -24,8 +30,6 @@ echo "Installing required packages for joining a Windows Domain..."
 apt install -qq -y realmd sssd samba-common krb5-user krb5-config samba-common-bin sssd-tools libnss-sss libpam-sss adcli 
 
 # Discover the domain
-DOMAIN="gruppe6.dk"
-USER="frol"
 echo "Discovering domain $DOMAIN..."
 realm discover $DOMAIN
 
@@ -64,11 +68,6 @@ grep -qF "$PAM_LINE" "$PAM_SESSION_CONF" || echo "$PAM_LINE" | sudo tee -a "$PAM
 echo "Enabling and starting SSSD service..."
 systemctl enable sssd
 systemctl start sssd
-
-# Variables
-DOMAIN="example.com"
-DOMAIN_IP="domain_ip"
-AD_OU="ad_ou"
 
 # Check /etc/resolv.conf
 if grep -q "search $DOMAIN" /etc/resolv.conf && grep -q "nameserver $DOMAIN_IP" /etc/resolv.conf; then

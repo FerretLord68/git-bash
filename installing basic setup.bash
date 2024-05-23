@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#test
-
 # Variables
 DOMAIN="gruppe6.dk"
 DOMAIN_IP="domain_ip"

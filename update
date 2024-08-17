@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# Define the log files
+LOG_FILE="/cron-scripts/update-task.txt"
+TIME_FILE="/cron-scripts/upgrade-time.txt"
+
+# Add a line break berfor updating and upgrading
+echo "" | tee -a "$TIME_FILE"
+
+# Add a line break berfor updating and upgrading
+echo "" | tee -a "$LOG_FILE"
+
+# Function to log messages with timestamps
+log() {
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+# Redirect all stderr to the log file (stdout is already handled by the log function)
+exec 2>>"$LOG_FILE"
+
+# Start logging
+log "Starting update and upgrade process..."
+
+# Update the package list
+log "Updating package list..."
+sudo apt-get update -y > /dev/null
+
+# Upgrade all installed packages and check if there are any updates
+log "Checking for upgrades..."
+UPGRADE_OUTPUT=$(sudo apt-get -s upgrade -y)
+if echo "$UPGRADE_OUTPUT" | grep -q "0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded"; then
+    log "No updates or upgrades were necessary."
+else
+    log "Upgrading installed packages..."
+    sudo apt-get upgrade -y | tee -a "$LOG_FILE"
+fi
+
+# Remove unnecessary packages and dependencies
+log "Removing unnecessary packages..."
+sudo apt-get autoremove -y > /dev/null
+
+# Clean up the local repository of retrieved package files
+log "Cleaning up..."
+sudo apt-get clean > /dev/null
+
+log "Update and upgrade complete!"
+
+# Add a line break after the completion message
+echo "" | tee -a "$LOG_FILE"
+
+# Log the completion time to a separate file
+echo "Update & upgrade was completed at $(date '+%Y-%m-%d %H:%M:%S')" >> "$TIME_FILE"
+
+# Add a line break after the completion message
+echo "" | tee -a "$TIME_FILE"
+
+# Check if a reboot is required
+if [ -f /var/run/reboot-required ]; then
+    log "Reboot is required. Rebooting now..."
+    sudo reboot
+else
+    log "No reboot required."
+fi

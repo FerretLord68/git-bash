@@ -1,0 +1,57 @@
+#!/bin/bash
+
+# Define variables
+LOG_FILE="/path/to/backup/file"
+BACKUP_DIR="/tmp"
+BACKUP_FILE="server_backup_$(date '+%Y-%m-%d').tar.gz"
+REMOTE_SERVER="ip"
+REMOTE_PORT="port_number"
+REMOTE_USER="user"
+REMOTE_PATH="/backup/dir"
+
+# List of important directories and files to back up
+CONFIG_FILES=(
+    "/etc"
+    "/home"
+    "/var/www"  # Add other important directories here
+)
+
+# Function to log messages with timestamps
+log() {
+    echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+}
+
+# Redirect all stderr to the log file (stdout is already handled by the log function)
+exec 2>>"$LOG_FILE"
+
+# Start logging
+log "Starting backup and transfer process..."
+
+# Create a compressed backup of the specified directories and files
+log "Creating backup..."
+if sudo tar -czpf "$BACKUP_DIR/$BACKUP_FILE" "${CONFIG_FILES[@]}"; then
+    log "Backup created successfully: $BACKUP_FILE"
+else
+    log "Error creating backup"
+    exit 1
+fi
+
+# Transfer the backup via SCP
+log "Transferring backup to $REMOTE_SERVER..."
+if scp -P "$REMOTE_PORT" "$BACKUP_DIR/$BACKUP_FILE" "$REMOTE_USER@$REMOTE_SERVER:$REMOTE_PATH"; then
+    log "Backup transferred successfully to $REMOTE_SERVER"
+else
+    log "Error transferring backup"
+    exit 1
+fi
+
+# Clean up the local backup file
+log "Cleaning up local backup file..."
+if rm "$BACKUP_DIR/$BACKUP_FILE"; then
+    log "Local backup file removed successfully"
+else
+    log "Error removing local backup file"
+    exit 1
+fi
+
+log "Backup and transfer process complete!"
